@@ -77,6 +77,7 @@ class QuasiDenseRoIHead(StandardRoIHead):
                       ref_gt_bboxes_ignore=None,
                       *args,
                       **kwargs):
+        import pdb;pdb.set_trace()
         losses = super().forward_train(x, img_metas, proposal_list, gt_bboxes,
                                        gt_labels, gt_bboxes_ignore, gt_masks,
                                        *args, **kwargs)

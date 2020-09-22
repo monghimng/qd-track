@@ -23,6 +23,48 @@ def parse_args():
     return parser.parse_args()
 
 
+"""
+Generate a dataset in the following format:
+
+categories: [
+    {
+        id: 1-based index,
+        name: str describing the category
+    }
+]
+
+videos: [
+    {
+        id: 0-based index,
+        name: yyy
+    },
+]
+    
+images: [
+    {
+        file_name: relative path of the img,
+        height:
+        width:
+        id; 0-based id unique to each individual img,
+        video_id: correspond id from the videos json,
+        frame_id: todo
+    }
+]
+
+annotations: [
+    {
+        id: 0-based global unique identifier,
+        image_id: corresponding image id it is in,
+        category_id:
+        instance_id: id to track object,
+        bbox:
+        area:
+        occluded:
+        truncated:
+        iscrowd:
+    }
+]
+"""
 def main():
     args = parse_args()
 
@@ -75,6 +117,7 @@ def main():
                     coco['annotations'].append(ann)
                     ann_id += 1
                 img_id += 1
+        import pdb;pdb.set_trace()
         mmcv.dump(
             coco,
             osp.join(args.output, f'bdd100k_track_{subset}_cocoformat.json'))
@@ -85,3 +128,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+"""
+source $PYTHON_ENV/conda/bin/activate
+conda activate qdtrack
+python $CODE/qd-track/tools/convert_datasets/bddtrack2cocovid.py -i /data/ck/data/bdd/tracking/labels-20 -o /data/ck/data/bdd/tracking/annotations
+"""

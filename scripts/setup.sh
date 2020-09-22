@@ -41,4 +41,7 @@ ln -s $DATA/data $CODE/qd-track/data
 
 << sample_cmd
 bash ~/mmdetection/scripts/setup_on_rise_machiens.sh
+deactivate;
+source $PYTHON_ENV/conda/bin/activate
+conda activate qdtrack
 sample_cmd

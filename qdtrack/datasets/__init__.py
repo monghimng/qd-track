@@ -1,6 +1,7 @@
 from mmdet.datasets.builder import (DATASETS, PIPELINES, build_dataset)
 
 from .bdd_video_dataset import BDDVideoDataset
+from .tao_video_dataset import TAOVideoDataset
 from .builder import build_dataloader
 from .coco_video_dataset import CocoVideoDataset
 from .parsers import CocoVID
@@ -12,5 +13,5 @@ __all__ = [
     'DATASETS', 'PIPELINES', 'build_dataloader', 'build_dataset', 'CocoVID',
     'BDDVideoDataset', 'CocoVideoDataset', 'LoadMultiImagesFromFile',
     'SeqLoadAnnotations', 'SeqResize', 'SeqNormalize', 'SeqRandomFlip',
-    'SeqPad', 'SeqDefaultFormatBundle', 'SeqCollect'
+    'SeqPad', 'SeqDefaultFormatBundle', 'SeqCollect', 'TAOVideoDataset',
 ]
