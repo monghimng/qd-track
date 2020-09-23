@@ -100,6 +100,16 @@ class QuasiDenseEmbedHead(nn.Module):
 
     def get_track_targets(self, gt_match_indices, key_sampling_results,
                           ref_sampling_results):
+        """
+
+        Args:
+            gt_match_indices ():
+            key_sampling_results ():
+            ref_sampling_results ():
+
+        Returns:
+
+        """
         track_targets = []
         track_weights = []
         for _gt_match_indices, key_res, ref_res in zip(gt_match_indices,
@@ -108,8 +118,6 @@ class QuasiDenseEmbedHead(nn.Module):
             targets = _gt_match_indices.new_zeros(
                 (key_res.pos_bboxes.size(0), ref_res.bboxes.size(0)),
                 dtype=torch.int)
-            print(_gt_match_indices)
-            print(key_res.pos_assigned_gt_inds)
             _match_indices = _gt_match_indices[key_res.pos_assigned_gt_inds]
 
             pos2pos = (_match_indices.view(
@@ -150,7 +158,6 @@ class QuasiDenseEmbedHead(nn.Module):
         loss_track_aux = 0.
         # import pdb;pdb.set_trace()
         # ckk
-        print('ckk')
         for _dists, _cos_dists, _targets, _weights in zip(
                 dists, cos_dists, targets, weights):
             loss_track += self.loss_track(

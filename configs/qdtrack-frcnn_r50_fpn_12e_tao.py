@@ -198,7 +198,7 @@ data = dict(
         dict(
             type=dataset_type,
             ann_file=data_root +
-            'annotations_coco/train_with_freeform.json',
+            'annotations_coco/train.json',
             img_prefix=data_root + 'frames',
             key_img_sampler=dict(interval=1),
             ref_img_sampler=dict(num_ref_imgs=1, scope=3, method='uniform'),
@@ -214,7 +214,7 @@ data = dict(
     val=dict(
         type=dataset_type,
         ann_file=data_root +
-        'annotations_coco/validation_with_freeform.json',
+        'annotations_coco/validation.json',
         img_prefix=data_root + 'frames',
         pipeline=test_pipeline),
     # test=dict(

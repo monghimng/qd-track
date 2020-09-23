@@ -110,7 +110,8 @@ def main():
 
 
             for anno in coco['annotations']:
-                anno['instance_id'] = anno['track_id']
+                # for some reason, this codebase expects instance_id to be 1-based
+                anno['instance_id'] = anno['track_id'] + 1
             import pdb;pdb.set_trace()
 
             mmcv.dump(

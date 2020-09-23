@@ -9,9 +9,6 @@
 #SBATCH -t 2-00:00
 #SBATCH --cpus-per-task 10
 
-REPO=mmdetection
-mkdir -p $CODE/$REPO $DATA/$REPO
-
 ############################## installing conda
 cd $PYTHON_ENV
 wget https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh

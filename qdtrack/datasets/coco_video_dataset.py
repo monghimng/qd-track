@@ -150,13 +150,16 @@ class CocoVideoDataset(CocoDataset):
             dict: Training data and annotation after pipeline with new keys \
                 introduced by pipeline.
         """
-        # idx = 100
+        # idx = 7
         # import pdb;pdb.set_trace()
         img_info = self.data_infos[idx]
+        # print(idx, img_info)
         ref_img_info = self.ref_img_sampling(img_info, **self.ref_img_sampler)
 
         results = self.prepare_results(img_info)
         ref_results = self.prepare_results(ref_img_info)
+        # print('results', results)
+        # print('refresults', ref_results)
 
         if self.match_gts:
             results, ref_results = self.match_results(results, ref_results)
