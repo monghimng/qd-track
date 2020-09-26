@@ -2,6 +2,16 @@ from collections import defaultdict
 
 
 def track2result(bboxes, labels, ids):
+    """
+
+    Args:
+        bboxes ():
+        labels ():
+        ids (): instance ids of the bboxes
+
+    Returns:
+
+    """
     valid_inds = ids > -1
     bboxes = bboxes[valid_inds].cpu().numpy()
     labels = labels[valid_inds].cpu().numpy()

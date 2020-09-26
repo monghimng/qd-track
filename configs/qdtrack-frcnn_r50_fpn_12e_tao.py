@@ -217,7 +217,13 @@ data = dict(
         'annotations_coco/validation.json',
         img_prefix=data_root + 'frames',
         pipeline=test_pipeline),
-    # test=dict(
+    test=dict(
+        type=dataset_type,
+        ann_file=data_root +
+                 'annotations_coco/validation.json',
+        img_prefix=data_root + 'frames',
+        pipeline=test_pipeline),
+# test=dict(
     #     type=dataset_type,
     #     ann_file=data_root +
     #     'tracking/annotations/bdd100k_track_val_cocoformat.json',

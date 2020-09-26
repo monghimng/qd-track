@@ -36,13 +36,15 @@ def intersection_over_area(preds, gts):
 
 
 def preprocessResult(res, anns, cats_mapping, crowd_ioa_thr=0.5):
-    """Preprocesses data for utils.CLEAR_MOT_M.
+    """Preprocesses data for utils.CLEAR_MOT_M. In particular, we drop predictions that
+    have high iou with gt bboxes that shouldn't be counted, such as 'iscrowded'.
 
     Returns a subset of the predictions.
     """
     # pylint: disable=too-many-locals
 
     # fast indexing
+    # maps image_id -> category_id -> annotations that have this category id and occurs in that img
     annsByAttr = defaultdict(lambda: defaultdict(list))
 
     for i, bbox in enumerate(anns['annotations']):
@@ -168,22 +170,25 @@ def aggregate_eval_results(summary,
     return new_summary
 
 
-def eval_mot(anns, all_results, split_camera=False, class_average=False):
+def eval_mot(anns, all_results, split_camera=False, class_average=False, ann_path=None):
     print('Evaluating BDD Results...')
     assert len(all_results) == len(anns['images'])
     t = time.time()
 
     cats_mapping = {k['id']: k['id'] for k in anns['categories']}
 
+    ############################## filtering predictions and gts that should be ignored
     preprocessResult(all_results, anns, cats_mapping)
     anns['annotations'] = [
         a for a in anns['annotations']
         if not (a['iscrowd'] or a.get('ignore', False))
     ]
 
-    # fast indexing
-    annsByAttr = defaultdict(lambda: defaultdict(list))
+    tao_evaluation(ann_path, anns, all_results)
 
+    # fast indexing
+    # maps image_id -> category_id -> annotations that have this category id and occurs in that img
+    annsByAttr = defaultdict(lambda: defaultdict(list))
     for i, bbox in enumerate(anns['annotations']):
         annsByAttr[bbox['image_id']][cats_mapping[bbox['category_id']]].append(
             i)
@@ -287,3 +292,47 @@ def eval_mot(anns, all_results, split_camera=False, class_average=False):
 
     out = {k: v for k, v in summary.to_dict().items()}
     return out
+
+
+def tao_evaluation(tao_ann_file, anns, results_coco_format):
+    from tao.toolkit.tao import TaoEval
+
+    ############################## debugging code to make sure we are using TaoEval correctly
+    ############################## we pass the gt ann as predictions
+    annos = anns['annotations']
+    for ann in annos:
+        ann['score'] = 1
+    import logging
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    tao_eval = TaoEval(tao_ann_file, annos)
+    tao_eval = TaoEval(tao_ann_file, annos[:len(annos)//2])
+    tao_eval.run()
+    tao_eval.print_results()
+    import pdb;pdb.set_trace()
+
+    ############################## end debugging code
+
+    # convert results from coco format to tao format
+    global_instance_id = 0
+    results_tao_format = []
+    for img, results_in_img in zip(anns['images'], results_coco_format):
+        img_id = img['id']
+
+        if img['frame_id'] == 0:
+            global_instance_id += 300  # shift it 300 to restart counting in next video
+
+        for instance_id, result in results_in_img.items():
+            instance_id = int(instance_id) + global_instance_id
+            result_tao_format = {
+                "image_id": img_id,
+                "category_id": result['label'] + 1,  # coco labels are 1-based
+                "bbox": xyxy2xywh(result['bbox'][:-1]),
+                "score": result['bbox'][-1],
+                "track_id": instance_id,
+                "video_id": img['video_id'],
+            }
+            results_tao_format.append(result_tao_format)
+
+    TaoEval(tao_ann_file, results_tao_format)
+

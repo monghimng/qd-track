@@ -106,18 +106,27 @@ def main():
                 img_infos_within_a_vid = sorted(img_infos_within_a_vid, key=lambda img_info: img_info['frame_index'])
                 for i, img_info in enumerate(img_infos_within_a_vid):
                     img_info['frame_id'] = i
-            # import pdb;pdb.set_trace()
-
+                    img_info['frame_index'] = i
 
             for anno in coco['annotations']:
                 # for some reason, this codebase expects instance_id to be 1-based
                 anno['instance_id'] = anno['track_id'] + 1
-            import pdb;pdb.set_trace()
+                anno['track'] = anno['track_id'] + 1
 
             mmcv.dump(
                 coco,
                 osp.join(args.output, info))
 
+            ############################## generate a small version for debugging, containing only the first video
+
+            coco['videos'] = [[vid for vid in coco['videos'] if vid['metadata']['dataset'] == 'BDD'][0]]
+            vid = coco['videos'][0]['id']
+            coco['images'] = [img for img in coco['images'] if img['video_id'] == vid]
+            img_ids = {img['id'] for img in coco['images']}
+            coco['annotations'] = [ann for ann in coco['annotations'] if ann['image_id'] in img_ids]
+            mmcv.dump(
+                coco,
+                osp.join(args.output, 'small_' + info))
 
 if __name__ == '__main__':
     main()
@@ -127,7 +136,35 @@ deactivate
 source $PYTHON_ENV/conda/bin/activate
 conda activate qdtrack
 python $CODE/qd-track/tools/convert_datasets/taotrack2cocovid.py -i /data/ck/data/tao/annotations -o /data/ck/data/tao/annotations_coco
+
+
+############################## code scraps for examining the integrity of tao
 [a['name'] for a in coco['categories']]
+[a['name'] for a in coco['categories']][206]  # is cap_(headwear)
+coco['categories'][979]  # skateboard
+
+cid = [a['category_id'] for a in coco['annotations']]
+import numpy as np
+cid = np.array(cid)
+ckkk = [print(i) for i, c in enumerate(cid) if c == 804]
+ckkk = [print(i) for i, c in enumerate(cid) if c == 805]
+ckkk = [print(i) for i, c in enumerate(cid) if c == 979]
+
+ckkk = [print(i) for i, c in enumerate(cid) if c == 980]
+
+coco['annotations'][50238]
+coco['annotations'][50243]
+coco['annotations'][50248]
+coco['annotations'][50257]
+
+coco['annotations'][54611]
+coco['annotations'][54141]
+
+coco['annotations'][47224]
+
+[img for img in coco['images'] if img['id'] == 98189]
+[img for img in coco['images'] if img['id'] == 93355]
+##############################
 """
 
 

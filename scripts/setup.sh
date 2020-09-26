@@ -35,6 +35,11 @@ cd detection/images/
 mv 100k/* ./
 
 ln -s $DATA/data $CODE/qd-track/data
+mkdir -p /data/ck/qd-track/work_dirs
+
+rsync_local_data_to_remote_data /data/ck/data/bdd/ freddie pavia
+rsync_local_data_to_remote_data $DATA/qd-track/ freddie pavia
+
 
 << sample_cmd
 bash ~/mmdetection/scripts/setup_on_rise_machiens.sh

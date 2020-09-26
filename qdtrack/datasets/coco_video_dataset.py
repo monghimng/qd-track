@@ -249,6 +249,34 @@ class CocoVideoDataset(CocoDataset):
                  proposal_nums=(100, 300, 1000),
                  iou_thr=None,
                  metric_items=None):
+        """
+
+        Args:
+            results (): A dictionary of the following format:
+
+                bbox_result: [
+
+                ] x n, where n is the number of evaluation sample.
+
+
+                track_result: [
+                    {
+                        bbox: ndarray containing (topleftx, toplefty, bottomwrightx, bottomerighty, prob),
+                        label: int
+                    } x k, where k is the number of objects in that image
+                ] x n, where n is the number of evaluation sample
+
+            metric ():
+            logger ():
+            classwise ():
+            mot_class_average ():
+            proposal_nums ():
+            iou_thr ():
+            metric_items ():
+
+        Returns:
+
+        """
         # evaluate for detectors without tracker
         eval_results = dict()
         metrics = metric if isinstance(metric, list) else [metric]
@@ -281,7 +309,8 @@ class CocoVideoDataset(CocoDataset):
             track_eval_results = eval_mot(
                 mmcv.load(self.ann_file),
                 results['track_result'],
-                class_average=mot_class_average)
+                class_average=mot_class_average,
+                ann_path=self.ann_file)
             eval_results.update(track_eval_results)
 
         return eval_results
