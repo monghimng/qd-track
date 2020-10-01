@@ -184,7 +184,7 @@ def eval_mot(anns, all_results, split_camera=False, class_average=False, ann_pat
         if not (a['iscrowd'] or a.get('ignore', False))
     ]
 
-    tao_evaluation(ann_path, anns, all_results)
+    tao_results = tao_evaluation(ann_path, anns, all_results)
 
     # fast indexing
     # maps image_id -> category_id -> annotations that have this category id and occurs in that img
@@ -291,6 +291,7 @@ def eval_mot(anns, all_results, split_camera=False, class_average=False, ann_pat
     print('Evaluation finsihes with {:.2f} s'.format(time.time() - t))
 
     out = {k: v for k, v in summary.to_dict().items()}
+    print("This code has been hit \n\n\n\n")
     return out
 
 
@@ -299,18 +300,17 @@ def tao_evaluation(tao_ann_file, anns, results_coco_format):
 
     ############################## debugging code to make sure we are using TaoEval correctly
     ############################## we pass the gt ann as predictions
-    annos = anns['annotations']
-    for ann in annos:
-        ann['score'] = 1
-    import logging
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    tao_eval = TaoEval(tao_ann_file, annos)
-    tao_eval = TaoEval(tao_ann_file, annos[:len(annos)//2])
-    tao_eval.run()
-    tao_eval.print_results()
-    import pdb;pdb.set_trace()
-
+    # annos = anns['annotations']
+    # for ann in annos:
+    #     ann['score'] = 1
+    # import logging
+    # logger = logging.getLogger()
+    # logger.setLevel(logging.INFO)
+    # tao_eval = TaoEval(tao_ann_file, annos)
+    # # tao_eval = TaoEval(tao_ann_file, annos[:len(annos)//2])
+    # import pdb;pdb.set_trace()
+    # tao_eval.run()
+    # tao_eval.print_results()
     ############################## end debugging code
 
     # convert results from coco format to tao format
@@ -334,5 +334,12 @@ def tao_evaluation(tao_ann_file, anns, results_coco_format):
             }
             results_tao_format.append(result_tao_format)
 
-    TaoEval(tao_ann_file, results_tao_format)
+    import logging
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    tao_eval = TaoEval(tao_ann_file, results_tao_format)
+    tao_eval.run()
+    tao_eval.print_results()
+    results = tao_eval.get_results()
+    return results
 

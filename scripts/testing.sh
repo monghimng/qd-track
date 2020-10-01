@@ -18,6 +18,16 @@ export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES:-7}
 ##################################################
 ##### Instructions for General Researchers
 ##################################################
+# debug using bdd
+python tools/test.py \
+configs/qdtrack-frcnn_r50_fpn_12e_bdd100k.py \
+pretrained/qdtrack-frcnn_r50_fpn_12e_bdd100k-13328aed.pth \
+--eval track \
+--cfg-options \
+data.test.ann_file=data/bdd/tracking/annotations/small_bdd100k_track_val_taoformat.json \
+data.val.ann_file=data/bdd/tracking/annotations/small_bdd100k_track_val_taoformat.json \
+
+exit
 
 #bash ./tools/dist_test.sh \
 python tools/test.py \
@@ -27,10 +37,9 @@ configs/qdtrack-frcnn_r50_fpn_12e_tao.py \
 --cfg-options \
 data.test.ann_file=data/tao/annotations_coco/small_validation.json \
 data.val.ann_file=data/tao/annotations_coco/small_validation.json \
-#data.train.ann_file=data/tao/annotations_coco/train.json \
 #data.test.key_img_sampler.interval=5000 \
 #configs/qdtrack-frcnn_r50_fpn_12e_bdd100k.py \
-#$DATA/qd-track/qdtrack-frcnn_r50_fpn_12e_bdd100k-13328aed_2.pth \
+#pretrained/qdtrack-frcnn_r50_fpn_12e_bdd100k-13328aed_2.pth \
 #3 \
 #--eval bbox \
 #--show \

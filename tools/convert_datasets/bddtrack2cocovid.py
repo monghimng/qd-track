@@ -89,7 +89,8 @@ def main():
                     width=1280,
                     id=img_id,
                     video_id=vid_id,
-                    frame_id=img_info['index'])
+                    frame_id=img_info['index'],
+                    frame_index=img_info['index'])
                 coco['images'].append(image)
                 for ann_info in img_info['labels']:
                     if ann_info['category'] in CLASSES:
@@ -117,13 +118,54 @@ def main():
                     coco['annotations'].append(ann)
                     ann_id += 1
                 img_id += 1
-        import pdb;pdb.set_trace()
-        mmcv.dump(
-            coco,
-            osp.join(args.output, f'bdd100k_track_{subset}_cocoformat.json'))
+        # mmcv.dump(
+        #     coco,
+        #     osp.join(args.output, f'bdd100k_track_{subset}_cocoformat.json'))
+
         print('converted {} videos, {} images with {} objects'.format(
             len(coco['videos']), len(coco['images']),
             len(coco['annotations'])))
+
+        ############################## generate a small version for debugging, containing only one vid
+        coco['videos'] = [coco['videos'][0]]
+        vid = coco['videos'][0]['id']
+        coco['images'] = [img for img in coco['images'] if img['video_id'] == vid]
+        img_ids = {img['id'] for img in coco['images']}
+        coco['annotations'] = [ann for ann in coco['annotations'] if ann['image_id'] in img_ids]
+        mmcv.dump(
+            coco,
+            osp.join(args.output, f'small_bdd100k_track_{subset}_cocoformat.json'))
+
+        ############################## generate a small version in tao format for debugging, containing one vid
+
+        # tao has some extra properties for videos
+        for v in coco['videos']:
+            v['neg_category_ids'] = []
+            v['not_exhaustive_category_ids'] = []
+        tracks = []
+        counter = 0
+        instance_id_to_track_id = {}
+        for a in coco['annotations']:
+
+            # this repo was 1-base, but tao requires 0-based
+            iid = a['instance_id']
+            if iid not in instance_id_to_track_id:
+                instance_id_to_track_id[iid] = counter
+                counter += 1
+            tid = instance_id_to_track_id[iid]
+            a['track_id'] = tid
+
+            img_id = a['image_id']
+            vid = [img for img in coco['images'] if img['id'] == img_id][0]['video_id']
+            tracks.append({
+                'id': tid,
+                'category_id': a['category_id'],
+                'video_id': vid
+            })
+        coco['tracks'] = tracks
+        mmcv.dump(
+            coco,
+            osp.join(args.output, f'small_bdd100k_track_{subset}_taoformat.json'))
 
 
 if __name__ == '__main__':

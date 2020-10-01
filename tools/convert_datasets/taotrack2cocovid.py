@@ -111,7 +111,6 @@ def main():
             for anno in coco['annotations']:
                 # for some reason, this codebase expects instance_id to be 1-based
                 anno['instance_id'] = anno['track_id'] + 1
-                anno['track'] = anno['track_id'] + 1
 
             mmcv.dump(
                 coco,

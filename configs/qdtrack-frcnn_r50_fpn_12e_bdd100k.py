@@ -197,8 +197,9 @@ data = dict(
     train=[
         dict(
             type=dataset_type,
-            ann_file=data_root +
-            'tracking/annotations/bdd100k_track_train_cocoformat.json',
+            # ann_file=data_root +
+            # 'tracking/annotations/bdd100k_track_train_cocoformat.json',
+            ann_file='data/bdd/tracking/annotations/small_bdd100k_track_train_cocoformat.json',
             img_prefix=data_root + 'tracking/images/train/',
             key_img_sampler=dict(interval=1),
             ref_img_sampler=dict(num_ref_imgs=1, scope=3, method='uniform'),
@@ -206,8 +207,9 @@ data = dict(
         dict(
             type=dataset_type,
             load_as_video=False,
-            ann_file=data_root +
-            'detection/annotations/bdd100k_det_train_cocoformat.json',
+            # ann_file=data_root +
+            # 'detection/annotations/bdd100k_det_train_cocoformat.json',
+            ann_file='data/bdd/tracking/annotations/small_bdd100k_track_train_cocoformat.json',
             img_prefix=data_root + 'detection/images/train/',
             pipeline=train_pipeline)
     ],
