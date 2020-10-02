@@ -22,11 +22,12 @@ cd $CODE/qd-track
 #bash ./tools/dist_train.sh \
 python tools/train.py \
 configs/qdtrack-frcnn_r50_fpn_12e_bdd100k.py \
+--resume-from pretrained/qdtrack-frcnn_r50_fpn_12e_bdd100k-13328aed.pth \
 --cfg-options \
 data.samples_per_gpu=10 \
 data.workers_per_gpu=3 \
-data.test.ann_file=data/bdd/tracking/annotations/small_bdd100k_track_val_cocoformat.json \
-data.val.ann_file=data/bdd/tracking/annotations/small_bdd100k_track_val_cocoformat.json \
+data.test.ann_file=data/bdd/tracking/annotations/small_bdd100k_track_val_taoformat.json \
+data.val.ann_file=data/bdd/tracking/annotations/small_bdd100k_track_val_taoformat.json \
 #4 \
 #$DATA/qd-track/qdtrack-frcnn_r50_fpn_12e_bdd100k-13328aed_2.pth \
 #[optional arguments]

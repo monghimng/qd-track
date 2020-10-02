@@ -118,9 +118,9 @@ def main():
                     coco['annotations'].append(ann)
                     ann_id += 1
                 img_id += 1
-        # mmcv.dump(
-        #     coco,
-        #     osp.join(args.output, f'bdd100k_track_{subset}_cocoformat.json'))
+        mmcv.dump(
+            coco,
+            osp.join(args.output, f'bdd100k_track_{subset}_cocoformat.json'))
 
         print('converted {} videos, {} images with {} objects'.format(
             len(coco['videos']), len(coco['images']),

@@ -184,115 +184,125 @@ def eval_mot(anns, all_results, split_camera=False, class_average=False, ann_pat
         if not (a['iscrowd'] or a.get('ignore', False))
     ]
 
-    tao_results = tao_evaluation(ann_path, anns, all_results)
+    # only run if have predicting something, since the tao eval code breaks otherwise
+    # import pdb;pdb.set_trace()
+    if all_results:
+        tao_results = tao_evaluation(ann_path, anns, all_results)
+        results = {}
+        for k, v in tao_results.items():
+            k = [str(token) for token in k]
+            k = ''.join(k)
+            results[f'tao_val_{k}'] = v
+        return results
+    else:
+        return {}
 
-    # fast indexing
-    # maps image_id -> category_id -> annotations that have this category id and occurs in that img
-    annsByAttr = defaultdict(lambda: defaultdict(list))
-    for i, bbox in enumerate(anns['annotations']):
-        annsByAttr[bbox['image_id']][cats_mapping[bbox['category_id']]].append(
-            i)
-
-    track_acc = defaultdict(lambda: defaultdict())
-    global_instance_id = 0
-    num_instances = 0
-    cat_ids = np.unique(list(cats_mapping.values()))
-    video_camera_mapping = dict()
-    for cat_id in cat_ids:
-        for video in anns['videos']:
-            track_acc[cat_id][video['id']] = mm.MOTAccumulator(auto_id=True)
-            if split_camera:
-                video_camera_mapping[video['id']] = video['camera_id']
-
-    for img, results in zip(anns['images'], all_results):
-        img_id = img['id']
-
-        if img['frame_id'] == 0:
-            global_instance_id += num_instances
-        if len(list(results.keys())) > 0:
-            num_instances = max([int(k) for k in results.keys()]) + 1
-
-        pred_bboxes, pred_ids = defaultdict(list), defaultdict(list)
-        for instance_id, result in results.items():
-            _bbox = xyxy2xywh(result['bbox'])
-            _cat = cats_mapping[result['label'] + 1]
-            pred_bboxes[_cat].append(_bbox)
-            instance_id = int(instance_id) + global_instance_id
-            pred_ids[_cat].append(instance_id)
-
-        gt_bboxes, gt_ids = defaultdict(list), defaultdict(list)
-        for cat_id in cat_ids:
-            for i in annsByAttr[img_id][cat_id]:
-                ann = anns['annotations'][i]
-                gt_bboxes[cat_id].append(ann['bbox'])
-                gt_ids[cat_id].append(ann['instance_id'])
-            distances = mm.distances.iou_matrix(
-                gt_bboxes[cat_id], pred_bboxes[cat_id], max_iou=0.5)
-            track_acc[cat_id][img['video_id']].update(gt_ids[cat_id],
-                                                      pred_ids[cat_id],
-                                                      distances)
-
-    # eval for track
-    print('Generating matchings and summary...')
-    empty_cat = []
-    for cat, video_track_acc in track_acc.items():
-        for vid, v in video_track_acc.items():
-            if len(v._events) == 0:
-                empty_cat.append([cat, vid])
-    for cat, vid in empty_cat:
-        track_acc[cat].pop(vid)
-
-    names, acc = [], []
-    for cat, video_track_acc in track_acc.items():
-        for vid, v in video_track_acc.items():
-            name = '{}_{}'.format(cat, vid)
-            if split_camera:
-                name += '_{}'.format(video_camera_mapping[vid])
-            names.append(name)
-            acc.append(v)
-
-    metrics = [
-        'mota', 'motp', 'num_misses', 'num_false_positives', 'num_switches',
-        'mostly_tracked', 'mostly_lost', 'idf1'
-    ]
-
-    print('Evaluating box tracking...')
-    mh = mm.metrics.create()
-    summary = mh.compute_many(
-        acc,
-        metrics=[
-            'num_objects', 'motp', 'num_detections', 'num_misses',
-            'num_false_positives', 'num_switches', 'mostly_tracked',
-            'mostly_lost', 'idtp', 'num_predictions'
-        ],
-        names=names,
-        generate_overall=False)
-    if split_camera:
-        summary['camera_id'] = summary.index.str.split('_').str[-1]
-        for camera_id, summary_ in summary.groupby('camera_id'):
-            print('\nEvaluating camera ID: ', camera_id)
-            aggregate_eval_results(
-                summary_,
-                metrics,
-                list(track_acc.keys()),
-                mh,
-                generate_overall=True,
-                class_average=class_average)
-
-    print('\nEvaluating overall results...')
-    summary = aggregate_eval_results(
-        summary,
-        metrics,
-        list(track_acc.keys()),
-        mh,
-        generate_overall=True,
-        class_average=class_average)
-
-    print('Evaluation finsihes with {:.2f} s'.format(time.time() - t))
-
-    out = {k: v for k, v in summary.to_dict().items()}
-    print("This code has been hit \n\n\n\n")
-    return out
+    # # fast indexing
+    # # maps image_id -> category_id -> annotations that have this category id and occurs in that img
+    # annsByAttr = defaultdict(lambda: defaultdict(list))
+    # for i, bbox in enumerate(anns['annotations']):
+    #     annsByAttr[bbox['image_id']][cats_mapping[bbox['category_id']]].append(
+    #         i)
+    #
+    # track_acc = defaultdict(lambda: defaultdict())
+    # global_instance_id = 0
+    # num_instances = 0
+    # cat_ids = np.unique(list(cats_mapping.values()))
+    # video_camera_mapping = dict()
+    # for cat_id in cat_ids:
+    #     for video in anns['videos']:
+    #         track_acc[cat_id][video['id']] = mm.MOTAccumulator(auto_id=True)
+    #         if split_camera:
+    #             video_camera_mapping[video['id']] = video['camera_id']
+    #
+    # for img, results in zip(anns['images'], all_results):
+    #     img_id = img['id']
+    #
+    #     if img['frame_id'] == 0:
+    #         global_instance_id += num_instances
+    #     if len(list(results.keys())) > 0:
+    #         num_instances = max([int(k) for k in results.keys()]) + 1
+    #
+    #     pred_bboxes, pred_ids = defaultdict(list), defaultdict(list)
+    #     for instance_id, result in results.items():
+    #         _bbox = xyxy2xywh(result['bbox'])
+    #         _cat = cats_mapping[result['label'] + 1]
+    #         pred_bboxes[_cat].append(_bbox)
+    #         instance_id = int(instance_id) + global_instance_id
+    #         pred_ids[_cat].append(instance_id)
+    #
+    #     gt_bboxes, gt_ids = defaultdict(list), defaultdict(list)
+    #     for cat_id in cat_ids:
+    #         for i in annsByAttr[img_id][cat_id]:
+    #             ann = anns['annotations'][i]
+    #             gt_bboxes[cat_id].append(ann['bbox'])
+    #             gt_ids[cat_id].append(ann['instance_id'])
+    #         distances = mm.distances.iou_matrix(
+    #             gt_bboxes[cat_id], pred_bboxes[cat_id], max_iou=0.5)
+    #         track_acc[cat_id][img['video_id']].update(gt_ids[cat_id],
+    #                                                   pred_ids[cat_id],
+    #                                                   distances)
+    #
+    # # eval for track
+    # print('Generating matchings and summary...')
+    # empty_cat = []
+    # for cat, video_track_acc in track_acc.items():
+    #     for vid, v in video_track_acc.items():
+    #         if len(v._events) == 0:
+    #             empty_cat.append([cat, vid])
+    # for cat, vid in empty_cat:
+    #     track_acc[cat].pop(vid)
+    #
+    # names, acc = [], []
+    # for cat, video_track_acc in track_acc.items():
+    #     for vid, v in video_track_acc.items():
+    #         name = '{}_{}'.format(cat, vid)
+    #         if split_camera:
+    #             name += '_{}'.format(video_camera_mapping[vid])
+    #         names.append(name)
+    #         acc.append(v)
+    #
+    # metrics = [
+    #     'mota', 'motp', 'num_misses', 'num_false_positives', 'num_switches',
+    #     'mostly_tracked', 'mostly_lost', 'idf1'
+    # ]
+    #
+    # print('Evaluating box tracking...')
+    # mh = mm.metrics.create()
+    # summary = mh.compute_many(
+    #     acc,
+    #     metrics=[
+    #         'num_objects', 'motp', 'num_detections', 'num_misses',
+    #         'num_false_positives', 'num_switches', 'mostly_tracked',
+    #         'mostly_lost', 'idtp', 'num_predictions'
+    #     ],
+    #     names=names,
+    #     generate_overall=False)
+    # if split_camera:
+    #     summary['camera_id'] = summary.index.str.split('_').str[-1]
+    #     for camera_id, summary_ in summary.groupby('camera_id'):
+    #         print('\nEvaluating camera ID: ', camera_id)
+    #         aggregate_eval_results(
+    #             summary_,
+    #             metrics,
+    #             list(track_acc.keys()),
+    #             mh,
+    #             generate_overall=True,
+    #             class_average=class_average)
+    #
+    # print('\nEvaluating overall results...')
+    # summary = aggregate_eval_results(
+    #     summary,
+    #     metrics,
+    #     list(track_acc.keys()),
+    #     mh,
+    #     generate_overall=True,
+    #     class_average=class_average)
+    #
+    # print('Evaluation finsihes with {:.2f} s'.format(time.time() - t))
+    #
+    # out = {k: v for k, v in summary.to_dict().items()}
+    # return out
 
 
 def tao_evaluation(tao_ann_file, anns, results_coco_format):

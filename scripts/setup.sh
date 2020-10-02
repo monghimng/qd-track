@@ -38,7 +38,7 @@ ln -s $DATA/data $CODE/qd-track/data
 ln -s $CODE/pretrained $CODE/qd-track/pretrained
 mkdir -p /data/ck/qd-track/work_dirs
 
-rsync_local_data_to_remote_data /data/ck/data/bdd/ freddie pavia
+rsync_local_data_to_remote_data /data/ck/data/bdd/ freddie flaminio
 rsync_local_data_to_remote_data /data/ck/data/tao/annotations_coco/ flaminio pavia
 rsync_local_data_to_remote_data $DATA/qd-track/ freddie pavia
 

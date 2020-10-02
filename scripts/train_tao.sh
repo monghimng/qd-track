@@ -33,6 +33,7 @@ configs/qdtrack-frcnn_r50_fpn_12e_tao.py \
 --cfg-options \
 data.samples_per_gpu=9 \
 data.workers_per_gpu=3 \
+#--resume-from=pretrained/qdtrack-frcnn_r50_fpn_12e_bdd100k-13328aed.pth \
 #3 \
 #data.workers_per_gpu=3 \
 #configs/qdtrack-frcnn_r50_fpn_12e_bdd100k.py \
