@@ -12,10 +12,11 @@
 ############################## installing conda
 cd $PYTHON_ENV
 wget https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
-bash Anaconda3-2020.07-Linux-x86_64.sh
-# when prompted, install it at $PYTHON_ENV/conda
-
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Anaconda3-2020.07-Linux-x86_64.sh -b -p $PYTHON_ENV/conda
+bash Miniconda3-latest-Linux-x86_64.sh -b -p $PYTHON_ENV/miniconda
 source $PYTHON_ENV/conda/bin/activate
+source $PYTHON_ENV/miniconda/bin/activate
 conda create -n qdtrack python=3.7 -y
 conda activate qdtrack
 conda install pytorch=1.6 torchvision cudatoolkit=10.2 -c pytorch
@@ -40,7 +41,9 @@ mkdir -p /data/ck/qd-track/work_dirs
 
 rsync_local_data_to_remote_data /data/ck/data/bdd/ freddie flaminio
 rsync_local_data_to_remote_data /data/ck/data/tao/annotations_coco/ flaminio pavia
+rsync_local_data_to_remote_data /data/ck/data/tao/ flaminio luigi
 rsync_local_data_to_remote_data $DATA/qd-track/ freddie pavia
+rsync_local_data_to_remote_data $DATA/data/lvis/ freddie flaminio
 
 
 << sample_cmd

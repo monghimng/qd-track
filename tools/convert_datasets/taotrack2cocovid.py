@@ -97,6 +97,9 @@ def main():
             # [a['id'] for a in coco['images']][:100]
             # [a['frame_index'] for a in coco['images']][:100]
             # [a['frame_index'] for a in vid_id2img_infos[0]][:100]
+            for img in coco['images']:
+                img['not_exhaustive_category_ids'] = []
+                img['neg_category_ids'] = []
 
             vid_id2img_infos = defaultdict(list)
             for i, img in enumerate(coco['images']):

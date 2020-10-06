@@ -330,7 +330,7 @@ def tao_evaluation(tao_ann_file, anns, results_coco_format):
         img_id = img['id']
 
         if img['frame_id'] == 0:
-            global_instance_id += 300  # shift it 300 to restart counting in next video
+            global_instance_id += 10000  # shift it 10000 to restart counting in next video
 
         for instance_id, result in results_in_img.items():
             instance_id = int(instance_id) + global_instance_id

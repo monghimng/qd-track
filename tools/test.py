@@ -151,7 +151,10 @@ def main():
             for key in ['interval', 'tmpdir', 'start', 'gpu_collect']:
                 eval_kwargs.pop(key, None)
             eval_kwargs.update(dict(metric=args.eval, **kwargs))
-            print(dataset.evaluate(outputs, **eval_kwargs))
+            # print(dataset.evaluate(outputs, **eval_kwargs))
+            # debugging using lvis, remove the track results first because lvis expects only the detection results
+            det_outputs = outputs['bbox_result']
+            print(dataset.evaluate(det_outputs, **eval_kwargs))
 
 
 if __name__ == '__main__':

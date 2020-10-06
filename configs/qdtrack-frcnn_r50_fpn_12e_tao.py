@@ -155,9 +155,11 @@ test_cfg = dict(
         nms_thr=0.7,
         min_bbox_size=0),
     rcnn=dict(
-        score_thr=0.05,
+        # score_thr=0.05,
+        score_thr=0.0001,
         nms=dict(type='nms', iou_threshold=0.5),
-        max_per_img=100))
+        max_per_img=300))
+        # max_per_img = 100))
 # dataset settings
 dataset_type = 'TAOVideoDataset'
 data_root = 'data/tao/'
@@ -191,6 +193,25 @@ test_pipeline = [
             dict(type='VideoCollect', keys=['img'])
         ])
 ]
+# lvis_test_pipeline = [
+#     dict(type='LoadImageFromFile'),
+#     dict(
+#         type='MultiScaleFlipAug',
+#         img_scale=(1333, 800),
+#         flip=False,
+#         transforms=[
+#             dict(type='Resize', keep_ratio=True),
+#             dict(type='RandomFlip'),
+#             dict(
+#                 type='Normalize',
+#                 mean=[123.675, 116.28, 103.53],
+#                 std=[58.395, 57.12, 57.375],
+#                 to_rgb=True),
+#             dict(type='Pad', size_divisor=32),
+#             dict(type='ImageToTensor', keys=['img']),
+#             dict(type='Collect', keys=['img'])
+#         ])
+# ]
 data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
@@ -199,6 +220,8 @@ data = dict(
             type=dataset_type,
             ann_file=data_root +
             'annotations_coco/train.json',
+            # load_as_video=False,
+            # 'annotations_coco/small_train.json',
             img_prefix=data_root + 'frames',
             key_img_sampler=dict(interval=1),
             ref_img_sampler=dict(num_ref_imgs=1, scope=3, method='uniform'),
@@ -213,23 +236,34 @@ data = dict(
     ],
     val=dict(
         type=dataset_type,
+        # load_as_video=False,
         ann_file=data_root +
         'annotations_coco/validation.json',
         img_prefix=data_root + 'frames',
         pipeline=test_pipeline),
     test=dict(
         type=dataset_type,
-        ann_file=data_root +
-                 'annotations_coco/validation.json',
+        ann_file=data_root + 'annotations_coco/validation.json',
         img_prefix=data_root + 'frames',
-        pipeline=test_pipeline),
+        # pipeline=test_pipeline),
+        # load_as_video=False,
+        pipeline=test_pipeline)
+    # test=dict(
+    #     type='LVISV05Dataset',
+    #     # ann_file='data/lvis_v0.5/annotations/lvis_v0.5_val.json',
+    #     # img_prefix='data/lvis_v0.5/val2017/',
+    #     ann_file=data_root + 'annotations_coco/validation.json',
+    #     img_prefix=data_root + 'frames',
+    #     pipeline=lvis_test_pipeline)
+)
+
 # test=dict(
     #     type=dataset_type,
     #     ann_file=data_root +
     #     'tracking/annotations/bdd100k_track_val_cocoformat.json',
     #     img_prefix=data_root + 'tracking/images/val/',
     #     pipeline=test_pipeline)
-)
+# )
 # optimizer
 optimizer = dict(type='SGD', lr=0.04, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
@@ -261,3 +295,4 @@ load_from = None
 resume_from = None
 workflow = [('train', 1)]
 evaluation = dict(metric=['bbox', 'track'], interval=2)
+find_unused_parameters=True

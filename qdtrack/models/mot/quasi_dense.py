@@ -12,6 +12,7 @@ class QuasiDenseFasterRCNN(TwoStageDetector):
         self.prepare_cfg(kwargs)
         super().__init__(*args, **kwargs)
         self.tracker_cfg = tracker
+        self.tracker = None
 
     def prepare_cfg(self, kwargs):
         if kwargs.get('train_cfg', False):
@@ -76,7 +77,7 @@ class QuasiDenseFasterRCNN(TwoStageDetector):
         det_bboxes, det_labels, track_feats = self.roi_head.simple_test(
             x, img_metas, proposal_list, rescale)
 
-        if track_feats is not None:
+        if track_feats is not None and self.tracker:
             bboxes, labels, ids = self.tracker.match(
                 bboxes=det_bboxes,
                 labels=det_labels,
@@ -86,9 +87,29 @@ class QuasiDenseFasterRCNN(TwoStageDetector):
         bbox_result = bbox2result(det_bboxes, det_labels,
                                   self.roi_head.bbox_head.num_classes)
 
-        if track_feats is not None:
+        if track_feats is not None and self.tracker:
             track_result = track2result(bboxes, labels, ids)
         else:
             from collections import defaultdict
             track_result = defaultdict(list)
         return dict(bbox_result=bbox_result, track_result=track_result)
+
+    def train(self, mode=True):
+        """
+        Freeze the detector.
+        Args:
+            mode ():
+
+        Returns:
+
+        """
+        super(QuasiDenseFasterRCNN, self).train(mode)
+        freeze = [self.backbone, self.neck, self.rpn_head, self.roi_head.bbox_head, self.roi_head.bbox_roi_extractor]
+        for component in freeze:
+            component.eval()
+            for param in component.parameters():
+                param.requires_grad = False
+
+
+
+
